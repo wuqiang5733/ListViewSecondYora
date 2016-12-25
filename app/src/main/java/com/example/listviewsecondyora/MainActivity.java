@@ -23,8 +23,10 @@ public class MainActivity extends AppCompatActivity {
 
         final ArrayAdapter<Customer> adapter = new ArrayAdapter<>(
                 this,
-                android.R.layout.simple_list_item_multiple_choice
+//                android.R.layout.simple_list_item_multiple_choice
 //                android.R.layout.simple_list_item_single_choice
+                R.layout.list_item_customer,
+                R.id.list_item_customer_name
         );
 
         final ListView listView = (ListView) findViewById(R.id.activity_main_listView);
