@@ -1,18 +1,22 @@
 package com.example.listviewsecondyora;
 
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.SparseBooleanArray;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
-import android.widget.Toast;
+import android.widget.TextView;
 
 public class MainActivity extends AppCompatActivity {
+
+    private static float SELECTED_ITEM_TRANSLATION_X = 100;
+    private ListView listView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -21,37 +25,65 @@ public class MainActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        final ArrayAdapter<Customer> adapter = new ArrayAdapter<>(
-                this,
-//                android.R.layout.simple_list_item_multiple_choice
-//                android.R.layout.simple_list_item_single_choice
-                R.layout.list_item_customer,
-                R.id.list_item_customer_name
-        );
-
-        final ListView listView = (ListView) findViewById(R.id.activity_main_listView);
-        listView.setAdapter(adapter);
-         for (int i=0; i<20; i++) {
-             adapter.add(new Customer("Customer_" + Integer.toString(i)));
-         }
+        listView = (ListView) findViewById(R.id.activity_main_listView);
         listView.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE);
+
+        CustomerAdapter adapter = new CustomerAdapter();
+        for(int i=0; i<30; i++){
+            adapter.add(new Customer("Customer_" + Integer.toString(i)));
+        }
+        listView.setAdapter(adapter);
+
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                Customer customer = adapter.getItem(i);
-
-                StringBuilder builder = new StringBuilder();
-                SparseBooleanArray checkPositions = listView.getCheckedItemPositions();
-                for (int j=0;j<adapter.getCount();j++){
-                    if(checkPositions.get(j)){
-                        Customer selectedCustomer = adapter.getItem(j);
-                        builder.append(selectedCustomer.getName() + " ");
-                    }
+                float translationX;
+                if(listView.isItemChecked(i)){
+                    translationX = SELECTED_ITEM_TRANSLATION_X;
+                }else {
+                    translationX = 0;
                 }
-
-                Toast.makeText(MainActivity.this,"Selected " + builder.toString(),Toast.LENGTH_SHORT).show();
+                view.animate().translationX(translationX).setDuration(250).start();
             }
         });
+    }
+
+    private class CustomerAdapter extends ArrayAdapter<Customer> {
+
+        public CustomerAdapter() {
+            super(MainActivity.this, R.layout.list_item_customer);
+        }
+
+        @NonNull
+        @Override
+        public View getView(int position, View convertView, ViewGroup parent) {
+            //注意这些 View 是循环的，所以在做动画的时候，要注意
+            ViewHolder viewHolder;
+
+            if(convertView == null){
+                convertView = getLayoutInflater().inflate(R.layout.list_item_customer,parent,false);
+                viewHolder = new ViewHolder();
+                viewHolder.NameTextView = (TextView)convertView.findViewById(R.id.list_item_customer_name);
+                convertView.setTag(viewHolder);
+
+            }else {
+                viewHolder = (ViewHolder) convertView.getTag();
+                convertView.clearAnimation();
+                if(listView.isItemChecked(position)){
+                    convertView.setTranslationX(SELECTED_ITEM_TRANSLATION_X);
+                }else {
+                    convertView.setTranslationX(0);
+                }
+
+            }
+            Customer customer = getItem(position);
+            viewHolder.NameTextView.setText(customer.getName());
+            return  convertView;
+        }
+
+        private class ViewHolder {
+            public TextView NameTextView;
+        }
     }
 
     @Override
