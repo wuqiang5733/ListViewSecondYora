@@ -3,6 +3,7 @@ package com.example.listviewsecondyora;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.SparseBooleanArray;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -22,7 +23,8 @@ public class MainActivity extends AppCompatActivity {
 
         final ArrayAdapter<Customer> adapter = new ArrayAdapter<>(
                 this,
-                android.R.layout.simple_list_item_single_choice
+                android.R.layout.simple_list_item_multiple_choice
+//                android.R.layout.simple_list_item_single_choice
         );
 
         final ListView listView = (ListView) findViewById(R.id.activity_main_listView);
@@ -30,12 +32,22 @@ public class MainActivity extends AppCompatActivity {
          for (int i=0; i<20; i++) {
              adapter.add(new Customer("Customer_" + Integer.toString(i)));
          }
-        listView.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
+        listView.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE);
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
                 Customer customer = adapter.getItem(i);
-                Toast.makeText(MainActivity.this,"Selected " + customer.getName(),Toast.LENGTH_SHORT).show();
+
+                StringBuilder builder = new StringBuilder();
+                SparseBooleanArray checkPositions = listView.getCheckedItemPositions();
+                for (int j=0;j<adapter.getCount();j++){
+                    if(checkPositions.get(j)){
+                        Customer selectedCustomer = adapter.getItem(j);
+                        builder.append(selectedCustomer.getName() + " ");
+                    }
+                }
+
+                Toast.makeText(MainActivity.this,"Selected " + builder.toString(),Toast.LENGTH_SHORT).show();
             }
         });
     }
